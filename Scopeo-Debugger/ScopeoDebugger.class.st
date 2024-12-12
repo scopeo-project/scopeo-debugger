@@ -11,10 +11,16 @@ ScopeoDebugger >> restartCurrentContext [
 
 	self debuggerActionModel restartContext: self currentContext.
 	self clearUnsavedCodeChanges.
-	self currentContext method hasScopeoNodes ifTrue: [
-		self sindarinDebugger stepUntilScopeoInstrumentedNode ].
+	self stepOverScopeoCode.
 	self updateSourceCodeFor: self currentContext.
 	self updateCodeFromContext
+]
+
+{ #category : 'actions' }
+ScopeoDebugger >> stepOverScopeoCode [
+
+	self currentContext method hasScopeoNodes ifTrue: [
+		self sindarinDebugger stepUntilScopeoInstrumentedNode ]
 ]
 
 { #category : 'code pane' }
