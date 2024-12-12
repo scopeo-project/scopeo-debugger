@@ -7,6 +7,12 @@ Class {
 }
 
 { #category : 'actions' }
+ScopeoDebugger >> currentContextIsScopeo [
+
+	^ self currentContext method hasScopeoNodes
+]
+
+{ #category : 'actions' }
 ScopeoDebugger >> restartCurrentContext [
 
 	self debuggerActionModel restartContext: self currentContext.
@@ -14,6 +20,13 @@ ScopeoDebugger >> restartCurrentContext [
 	self stepOverScopeoCode.
 	self updateSourceCodeFor: self currentContext.
 	self updateCodeFromContext
+]
+
+{ #category : 'actions' }
+ScopeoDebugger >> stepInto [
+
+	self currentContextIsScopeo ifFalse: [ ^ super stepInto ].
+	self sindarinDebugger stepIntoScopeoInstrumentation
 ]
 
 { #category : 'actions' }
@@ -29,7 +42,7 @@ ScopeoDebugger >> stepOver [
 { #category : 'actions' }
 ScopeoDebugger >> stepOverScopeoCode [
 
-	self currentContext method hasScopeoNodes ifTrue: [
+	self currentContextIsScopeo ifTrue: [
 		self sindarinDebugger stepUntilScopeoInstrumentedNode ]
 ]
 
@@ -41,18 +54,16 @@ ScopeoDebugger >> updateCodeFromContext: aContext [
 	method := aContext method.
 	ast := method ast.
 	firstNode := ast statements first.
-	
+
 	self recordUnsavedCodeChanges.
 	aContext sourceCode = self code text ifFalse: [
 		self updateSourceCodeFor: aContext ].
-	selectionInterval := aContext method hasScopeoNodes
+	selectionInterval := self currentContextIsScopeo
 		                     ifTrue: [
-			                     | currentNode  originalNode |
-			                     currentNode :=  method
-				                                    sourceNodeForPC: aContext pc.
-										originalNode :=" currentNode parent = firstNode ifTrue:[originalNode := ].
-			                     ifFalse:[" currentNode sourceNode"]".
-		"	self halt."
+			                     | currentNode originalNode |
+			                     currentNode := method sourceNodeForPC:
+				                                    aContext pc.
+			                     originalNode := currentNode sourceNode.
 			                     originalNode start to: originalNode stop ]
 		                     ifFalse: [
 		                     self selectedCodeRangeForContext: aContext ].
@@ -75,10 +86,8 @@ ScopeoDebugger >> updateSourceCodeFor: aContext [
 
 	| codeText |
 	codeText := self unsavedCodeChanges at: aContext ifAbsent: [
-		            aContext method hasScopeoNodes
+		            self currentContextIsScopeo
 			            ifTrue: [ aContext method originalSourceCode ]
 			            ifFalse: [ aContext sourceCode ] ].
-
-
 	self code text: codeText
 ]
