@@ -17,6 +17,16 @@ ScopeoDebugger >> restartCurrentContext [
 ]
 
 { #category : 'actions' }
+ScopeoDebugger >> stepOver [
+
+	| oldContext |
+	oldContext := self currentContext.
+	self debuggerActionModel stepOver: oldContext.
+	oldContext method == self currentContext method ifTrue: [
+		self stepOverScopeoCode ]
+]
+
+{ #category : 'actions' }
 ScopeoDebugger >> stepOverScopeoCode [
 
 	self currentContext method hasScopeoNodes ifTrue: [
