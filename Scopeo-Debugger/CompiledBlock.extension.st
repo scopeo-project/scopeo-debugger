@@ -5,3 +5,8 @@ CompiledBlock >> hasScopeoNodes [
 
 	^self method hasScopeoNodes 
 ]
+
+{ #category : '*Scopeo-Debugger' }
+CompiledBlock >> originalSourceCode [
+	^self method originalSourceCode
+]
