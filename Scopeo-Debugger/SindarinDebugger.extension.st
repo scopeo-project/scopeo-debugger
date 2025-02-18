@@ -1,33 +1,36 @@
 Extension { #name : 'SindarinDebugger' }
 
 { #category : '*Scopeo-Debugger' }
-SindarinDebugger >> firstScopeoParentNodeWithSourceNode [
+SindarinDebugger >> firstInstrumentedParentNode [
 
 	| parent |
+	
 	parent := self node.
-	[ parent isScopeoNode and: [ parent sourceNode isScopeoNode not ] ]
-		whileFalse: [ parent := parent parent ].
+	[ parent isIndirectionNode and: [ parent sourceNode isIndirectionNode not ] ] whileFalse: [ 
+		parent := parent parent 
+	].
+	
 	^ parent
 ]
 
 { #category : '*Scopeo-Debugger' }
-SindarinDebugger >> isScopeoInstrumentedAssignment [
+SindarinDebugger >> isInstrumentedAssignment [
 
-	^ self firstScopeoParentNodeWithSourceNode sourceNode isAssignment
+	^ self firstInstrumentedParentNode sourceNode isAssignment
 ]
 
 { #category : '*Scopeo-Debugger' }
-SindarinDebugger >> isScopeoInstrumentedMessage [
+SindarinDebugger >> isInstrumentedMessage [
 
-	^ self firstScopeoParentNodeWithSourceNode sourceNode isMessage
+	^ self firstInstrumentedParentNode sourceNode isMessage
 ]
 
 { #category : '*Scopeo-Debugger' }
-SindarinDebugger >> stepIntoScopeoInstrumentation [
+SindarinDebugger >> stepIntoInstrumentation [
 
 	| scopeoNode messageReceiver messageSelector method methodNode dp|
-	self isScopeoInstrumentedMessage ifFalse: [ ^ self basicStepOver ].
-	scopeoNode := self firstScopeoParentNodeWithSourceNode.
+	self isInstrumentedMessage ifFalse: [ ^ self basicStepOver ].
+	scopeoNode := self firstInstrumentedParentNode.
 	
 	messageReceiver := self context at: self context size - 1.
 	messageSelector := self context at: self context size - 3.
@@ -42,10 +45,10 @@ SindarinDebugger >> stepIntoScopeoInstrumentation [
 ]
 
 { #category : '*Scopeo-Debugger' }
-SindarinDebugger >> stepUntilScopeoInstrumentedNode [
+SindarinDebugger >> stepUntilInstrumentedNode [
 
 	| current topParent levels |
-	self method hasScopeoNodes ifFalse: [ ^ self ].
+	self method isInstrumented ifFalse: [ ^ self ].
 	current := self node.
 	topParent := self node parent.
 	levels := 1.
