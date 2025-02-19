@@ -12,7 +12,7 @@ ScpDebugItCommand class >> defaultIconName [
 ]
 
 { #category : 'default' }
-ScpDebugItCommand class >> defaultName [ 
+ScpDebugItCommand class >> defaultName [
 
 	^ 'Debug it with Scopeo'
 ]
@@ -26,23 +26,16 @@ ScpDebugItCommand class >> defaultShortcutKey [
 { #category : 'executing' }
 ScpDebugItCommand >> execute [
 
-	| doItReceiver doItContext recorder |
-
+	| tmp1 tmp2 tmp3 |
 	(self context respondsTo: #doItReceiver)
 		ifTrue: [
-			doItReceiver := self context doItReceiver.
-			doItContext := self context doItContext ]
-		ifFalse: [ doItReceiver := doItContext := nil ].
-
-	recorder := ScpExecutionRecorder
-		forCode: self selectedTextOrLine 
-		inContext: doItContext 
-		onReceiver: doItReceiver.
-		
-	recorder execution inspect.
-	
-	(OupsDebugRequest newForContext: recorder process suspendedContext)
-		process: recorder process;
-		label: 'Debug it with Scopeo';
-		submit
+			tmp1 := self context doItReceiver.
+			tmp2 := self context doItContext ]
+		ifFalse: [ tmp1 := tmp2 := nil ].
+	tmp3 := ScpExecutionRecorder
+		        forCode: self selectedTextOrLine
+		        inContext: tmp2
+		        onReceiver: tmp1.
+	tmp3 runAsynchronously.
+	tmp3 execution inspect
 ]
